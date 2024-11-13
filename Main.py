@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-# Define the model
 class ChessNet(nn.Module):
     def __init__(self):
         super(ChessNet, self).__init__()
@@ -18,19 +17,16 @@ class ChessNet(nn.Module):
         x = torch.relu(self.fc2(x))
         return torch.sigmoid(self.fc3(x))
 
-# Initialize model, optimizer, and loss function
 model = ChessNet()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 criterion = nn.MSELoss()
 
-# Convert the chess board to a feature vector
 def board_to_vector(board):
     vector = np.zeros(64)
     for i, piece in enumerate(board.piece_map().values()):
         vector[i] = 1 if piece.color == chess.WHITE else -1
     return torch.tensor(vector, dtype=torch.float32)
 
-# Choose the best move using the model
 def choose_move(board, model):
     legal_moves = list(board.legal_moves)
     best_move = None
@@ -47,7 +43,6 @@ def choose_move(board, model):
 
     return best_move
 
-# Train the model
 def train(model, board, result):
     board_vector = board_to_vector(board)
     optimizer.zero_grad()
@@ -56,27 +51,22 @@ def train(model, board, result):
     loss.backward()
     optimizer.step()
 
-# Initialize Pygame
 pygame.init()
 
-# Constants for the board display
-WIDTH, HEIGHT = 512, 512  # Board size
+WIDTH, HEIGHT = 512, 512  
 SQUARE_SIZE = WIDTH // 8
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-# Load piece images
-pieces = {}
+pieces = {rook.png, bishop.png, knight.png, king.png, queen.png, pawn.png}
 piece_symbols = ['p', 'r', 'n', 'b', 'q', 'k', 'P', 'R', 'N', 'B', 'Q', 'K']
 for piece in piece_symbols:
     pieces[piece] = pygame.transform.scale(
         pygame.image.load(f'images/{piece}.png'), (SQUARE_SIZE, SQUARE_SIZE)
     )
 
-# Initialize the chess board
 board = chess.Board()
 
-# Display the board and pieces
 def draw_board(screen):
     colors = [WHITE, BLACK]
     for row in range(8):
@@ -91,7 +81,6 @@ def draw_board(screen):
             col, row = square % 8, square // 8
             screen.blit(piece_image, (col * SQUARE_SIZE, (7 - row) * SQUARE_SIZE))
 
-# Main game loop
 def main_game(model):
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Chess Game')
@@ -107,7 +96,7 @@ def main_game(model):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if board.turn:  # User plays as white
+                if board.turn: 
                     mouse_x, mouse_y = event.pos
                     col = mouse_x // SQUARE_SIZE
                     row = 7 - (mouse_y // SQUARE_SIZE)
@@ -121,7 +110,6 @@ def main_game(model):
                             board.push(move)
                             selected_square = None
 
-                            # Model makes its move
                             if not board.is_game_over():
                                 model_move = choose_move(board, model)
                                 if model_move:
@@ -133,5 +121,4 @@ def main_game(model):
 
     pygame.quit()
 
-# Run the game
 main_game(model)
